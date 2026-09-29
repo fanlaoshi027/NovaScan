@@ -5,6 +5,9 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -23,8 +26,19 @@ jobs:
         with:
           gradle-version: '8.11.1'
 
+      - name: Verify project
+        run: |
+          java -version
+          gradle --version
+          test -f gradlew && chmod +x gradlew || true
+
       - name: Build debug APK
-        run: gradle --no-daemon assembleDebug
+        run: |
+          if [ -f ./gradlew ]; then
+            ./gradlew --no-daemon assembleDebug
+          else
+            gradle --no-daemon assembleDebug
+          fi
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
