@@ -58,7 +58,9 @@ class DocumentDetector {
                 val pts = approx.toArray()
 
                 if (pts.size == 4) {
-                    val convex = MatOfPoint(pts.toList())
+                    // Avoid MatOfPoint constructor overload ambiguity in Kotlin/OpenCV.
+                    val convex = MatOfPoint()
+                    convex.fromArray(*pts)
                     if (Imgproc.isContourConvex(convex)) {
                         val rectangularity = area / imageArea
                         val score = rectangularity + 0.15 * shapeQuality(pts)
