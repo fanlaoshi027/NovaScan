@@ -4,10 +4,8 @@ import org.opencv.core.Mat
 import org.opencv.core.MatOfPoint
 import org.opencv.core.MatOfPoint2f
 import org.opencv.core.Point
-import org.opencv.core.Scalar
 import org.opencv.core.Size
 import org.opencv.imgproc.Imgproc
-import kotlin.math.abs
 import kotlin.math.hypot
 
 /** Lightweight real-time detector. It favors stable, large quadrilaterals over noisy edges. */
@@ -59,13 +57,17 @@ class DocumentDetector {
                 Imgproc.approxPolyDP(curve, approx, perimeter * 0.025, true)
                 val pts = approx.toArray()
 
-                if (pts.size == 4 && Imgproc.isContourConvex(MatOfPoint(*pts))) {
-                    val rectangularity = area / (imageArea)
-                    val score = rectangularity + 0.15 * shapeQuality(pts)
-                    if (score > bestScore) {
-                        bestScore = score
-                        best = orderPoints(pts).map { Point(it.x / scale, it.y / scale) }
+                if (pts.size == 4) {
+                    val convex = MatOfPoint(*pts)
+                    if (Imgproc.isContourConvex(convex)) {
+                        val rectangularity = area / imageArea
+                        val score = rectangularity + 0.15 * shapeQuality(pts)
+                        if (score > bestScore) {
+                            bestScore = score
+                            best = orderPoints(pts).map { Point(it.x / scale, it.y / scale) }
+                        }
                     }
+                    convex.release()
                 }
                 curve.release()
                 approx.release()
@@ -92,7 +94,7 @@ class DocumentDetector {
 
     fun isStable(minFrames: Int = 8): Boolean = stableFrames >= minFrames
 
-    private fun shapeQuality(p: List<Point>): Double {
+    private fun shapeQuality(p: Array<Point>): Double {
         val sides = (0 until 4).map { distance(p[it], p[(it + 1) % 4]) }
         val max = sides.maxOrNull() ?: return 0.0
         val min = sides.minOrNull() ?: return 0.0
