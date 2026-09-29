@@ -58,7 +58,7 @@ class DocumentDetector {
                 val pts = approx.toArray()
 
                 if (pts.size == 4) {
-                    val convex = MatOfPoint(*pts)
+                    val convex = MatOfPoint(pts.toList())
                     if (Imgproc.isContourConvex(convex)) {
                         val rectangularity = area / imageArea
                         val score = rectangularity + 0.15 * shapeQuality(pts)
