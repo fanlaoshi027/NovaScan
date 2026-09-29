@@ -1,0 +1,1 @@
+NovaScan APK build trigger. This file can be removed after the first successful build.
