@@ -34,25 +34,21 @@ jobs:
 
       - name: Build debug APK
         run: |
-          if [ -f ./gradlew ]; then
-            ./gradlew --no-daemon assembleDebug
-          else
-            gradle --no-daemon assembleDebug
-          fi
+          if [ -f ./gradlew ]; then ./gradlew --no-daemon assembleDebug; else gradle --no-daemon assembleDebug; fi
 
       - name: Build release APK
         run: |
-          if [ -f ./gradlew ]; then
-            ./gradlew --no-daemon assembleRelease
-          else
-            gradle --no-daemon assembleRelease
-          fi
+          if [ -f ./gradlew ]; then ./gradlew --no-daemon assembleRelease; else gradle --no-daemon assembleRelease; fi
+
+      - name: List APK outputs
+        if: always()
+        run: |
+          find app/build/outputs -type f -name '*.apk' -print || true
 
       - name: Upload APKs
+        if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: NovaScan-apks
-          path: |
-            app/build/outputs/apk/debug/*.apk
-            app/build/outputs/apk/release/*.apk
+          name: NovaScan-apks-v3
+          path: app/build/outputs/**/*.apk
           if-no-files-found: error
